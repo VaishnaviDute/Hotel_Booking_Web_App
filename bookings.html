@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Your Bookings — The Grand Velour</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Jost:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .bookings-container {
+            max-width: 1200px;
+            margin: 120px auto 60px;
+            padding: 0 40px;
+        }
+
+        .bookings-header {
+            margin-bottom: 50px;
+            text-align: left;
+        }
+
+        .bookings-table-wrap {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .bookings-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .bookings-table th {
+            text-align: left;
+            padding: 20px 24px;
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid var(--border);
+            color: var(--muted);
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+        }
+
+        .bookings-table td {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            color: var(--silver);
+            vertical-align: middle;
+        }
+
+        .bookings-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .bookings-table tr:hover {
+            background: rgba(201, 169, 110, 0.03);
+        }
+
+        .b-id-cell {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        .b-status-pill {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: rgba(76, 175, 125, 0.15);
+            color: #4CAF7D;
+        }
+
+        .b-status-pill::before {
+            content: '●';
+            margin-right: 6px;
+            font-size: 8px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 100px 40px;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 24px;
+            opacity: 0.3;
+        }
+
+        .back-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--gold);
+            text-decoration: none;
+            margin-bottom: 24px;
+            font-size: 14px;
+            transition: 0.3s;
+            opacity: 0.7;
+        }
+
+        .back-home:hover {
+            opacity: 1;
+            transform: translateX(-5px);
+        }
+
+        /* Light mode overrides */
+        body.light-mode .bookings-table-wrap {
+            background: #fff;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+        }
+
+        body.light-mode .bookings-table th {
+            background: #f9f9f9;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="nav-brand">The Grand Velour</div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="index.html#rooms">Rooms</a>
+            <a href="index.html#booking">Reserve</a>
+            <span id="userName" style="color:var(--gold);font-size:12px;margin-left:12px;opacity:0.8;"></span>
+            <button class="btn btn-outline" id="logoutBtn"
+                style="padding:4px 10px; font-size:10px; margin-left:10px; display:none;"
+                onclick="handleLogout()">Logout</button>
+            <button class="theme-toggle" id="themeToggle" title="Toggle Theme" onclick="toggleTheme()">
+                <span id="themeIcon">🌓</span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="bookings-container">
+        <a href="index.html" class="back-home">← Back to Reservations</a>
+
+        <div class="bookings-header">
+            <div class="sec-label">Your Experience</div>
+            <h1 class="sec-title">Recent Bookings</h1>
+            <p class="sec-sub" id="bookingSub">View and manage your upcoming stays at The Grand Velour</p>
+        </div>
+
+        <div id="authNotice"
+            style="display:none; text-align:center; padding:40px; background:rgba(201,169,110,0.05); border:1px solid var(--border); border-radius:12px;">
+            <p style="margin-bottom:20px;">Please login to view your recent bookings.</p>
+            <a href="index.html" class="btn btn-gold">Login Now</a>
+        </div>
+
+        <div class="bookings-table-wrap" id="bookingsContent">
+            <table class="bookings-table" id="bookingsTable">
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Guest</th>
+                        <th>Room</th>
+                        <th>Check-in</th>
+                        <th>Nights</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="bookingsBody">
+                    <!-- Loaded dynamically -->
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <div class="spinner" style="margin: 0 auto 20px;"></div>
+                                <p>Curating your reservations...</p>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <footer>
+        © 2026 The Grand Velour · All Rights Reserved · Crafted by Antigravity AI
+    </footer>
+
+    <script>
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-mode');
+                document.getElementById('themeIcon').textContent = '☀️';
+            } else {
+                document.getElementById('themeIcon').textContent = '🌙';
+            }
+        }
+
+        function toggleTheme() {
+            const isLight = document.body.classList.toggle('light-mode');
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+            document.getElementById('themeIcon').textContent = isLight ? '☀️' : '🌙';
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+
+        async function loadBookings() {
+            const userStr = localStorage.getItem('currentUser');
+            const content = document.getElementById('bookingsContent');
+            const body = document.getElementById('bookingsBody');
+            const sub = document.getElementById('bookingSub');
+            const authNotice = document.getElementById('authNotice');
+            const logoutBtn = document.getElementById('logoutBtn');
+
+            if (!userStr) {
+                content.style.display = 'none';
+                authNotice.style.display = 'block';
+                return;
+            }
+
+            const user = JSON.parse(userStr);
+            document.getElementById('userName').textContent = `Welcome, ${user.name.split(' ')[0]}`;
+            if (logoutBtn) logoutBtn.style.display = 'inline-block';
+
+            try {
+                const titleEl = document.querySelector('.sec-title');
+
+                // Determine API endpoint and UI labels based on role
+                let url = `/api/bookings/${user.email}`;
+                if (user.role === 'admin') {
+                    url = `/api/admin/bookings`;
+                    titleEl.textContent = "Master Booking Registry";
+                    sub.textContent = "Authorized Personnel: Accessing all hotel reservations";
+                } else {
+                    titleEl.textContent = "My Reservations";
+                    sub.textContent = "Review your unique experiences at The Grand Velour";
+                }
+
+                const res = await fetch(url);
+                const bookings = await res.json();
+
+                if (bookings.length === 0) {
+                    body.innerHTML = `
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-state">
+                                    <div class="empty-icon">🛎️</div>
+                                    <h3>No records found</h3>
+                                    <p style="color:var(--muted); margin-top:10px;">Your historical timeline is currently quiet.</p>
+                                    <a href="index.html#rooms" class="btn btn-gold" style="margin-top:24px;">Explore Rooms</a>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                body.innerHTML = bookings.map(b => `
+                    <tr>
+                        <td class="b-id-cell">${b.id}</td>
+                        <td>${b.guest_fname} ${b.guest_lname}</td>
+                        <td style="color:var(--text); font-weight:500;">${b.room_name}</td>
+                        <td>${new Date(b.checkin).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</td>
+                        <td>${b.nights}</td>
+                        <td style="color:var(--gold); font-weight:600;">₹${Math.round(b.total).toLocaleString()}</td>
+                        <td><span class="b-status-pill">${b.status}</span></td>
+                    </tr>
+                `).join('');
+
+            } catch (err) {
+                console.error(err);
+                body.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:40px; color:var(--red);">Unable to synchronize with the reservation servers.</td></tr>`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            loadBookings();
+        });
+    </script>
+</body>
+
+</html>

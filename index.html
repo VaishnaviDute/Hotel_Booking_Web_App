@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Grand Velour — Reservations</title>
+  <meta name="description"
+    content="Experience unparalleled luxury at The Grand Velour. Book your stay at our five-star boutique hotel with curated suites and premium services." />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Jost:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="">
+
+  <!-- AUTH MODAL (Can be reused for Room Booking) -->
+  <div class="modal-overlay" id="authModal" onclick="if(event.target===this)closeAuthModal()">
+    <div class="auth-card" style="margin: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+      <button class="modal-close" onclick="closeAuthModal()">×</button>
+      <div class="auth-logo">The Grand Velour</div>
+      <div class="auth-tabs">
+        <div class="auth-tab active" id="tab-login" onclick="switchAuth('login')">Login</div>
+        <div class="auth-tab" id="tab-register" onclick="switchAuth('register')">Register</div>
+      </div>
+
+      <div id="loginForm" class="auth-form active">
+        <div class="field" style="margin-bottom:16px;">
+          <label>Email</label>
+          <input type="email" id="loginEmail" placeholder="concierge@hotel.com" />
+        </div>
+        <div class="field" style="margin-bottom:24px;">
+          <label>Password</label>
+          <input type="password" id="loginPass" placeholder="••••••••" />
+        </div>
+        <button class="btn btn-gold" style="width:100%;" onclick="handleLogin()">Sign In</button>
+        <div style="text-align:center;font-size:12px;margin-top:20px;color:var(--muted);">
+          Don't have an account? <span style="color:var(--gold);cursor:pointer;"
+            onclick="switchAuth('register')">Register
+            now</span>
+        </div>
+      </div>
+
+      <div id="registerForm" class="auth-form">
+        <div class="field" style="margin-bottom:12px;">
+          <label>Full Name</label>
+          <input type="text" id="regName" placeholder="John Doe" />
+        </div>
+        <div class="field" style="margin-bottom:12px;">
+          <label>Email</label>
+          <input type="email" id="regEmail" placeholder="email@example.com" />
+        </div>
+        <div class="field" style="margin-bottom:20px;">
+          <label>Create Password</label>
+          <input type="password" id="regPass" placeholder="••••••••" />
+        </div>
+        <button class="btn btn-gold" style="width:100%;" onclick="handleRegister()">Create Account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-brand">The Grand Velour</div>
+    <div class="nav-links">
+      <a href="#rooms">Rooms</a>
+      <a href="#booking">Reserve</a>
+      <a href="#concierge">Concierge</a>
+      <a href="#admin" id="nav-admin" style="display:none;">Admin Dashboard</a>
+      <a href="bookings.html" id="nav-recent" style="display:none; color:var(--gold); font-weight:500;">Recent
+        Bookings</a>
+      <span id="userName" style="color:var(--gold);font-size:12px;margin-left:12px;opacity:0.8;"></span>
+      <button class="btn btn-outline" id="logoutBtn"
+        style="padding:6px 12px; font-size:10px; display:none; margin-left:10px;"
+        onclick="handleLogout()">Logout</button>
+      <button class="theme-toggle" id="themeToggle" title="Toggle Theme" onclick="toggleTheme()">
+        <span id="themeIcon">🌓</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-lines"></div>
+    <div style="position:relative;z-index:2;padding:0 20px;">
+      <div class="hero-tag">Five Star Collection</div>
+      <h1>Where Every Stay<br>Becomes <em>Legend</em></h1>
+      <div class="hero-sub">Curated luxury · Timeless elegance · Unforgettable moments</div>
+      <div class="hero-cta">
+        <a href="#booking" class="btn btn-gold">Book Your Stay</a>
+        <a href="#rooms" class="btn btn-outline">Explore Rooms</a>
+      </div>
+    </div>
+    <div class="scroll-hint">
+      <div class="scroll-hint-line"></div>
+      <span>Scroll</span>
+    </div>
+  </div>
+
+  <!-- ROOM DETAIL MODAL -->
+  <div class="modal-overlay" id="roomModal" onclick="if(event.target===this)closeRoomModal()">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeRoomModal()">×</button>
+      <div class="modal-info" id="modalInfo">
+        <!-- Dynamically filled -->
+      </div>
+      <div class="modal-booking">
+        <div id="modalAuthNotice"
+          style="text-align:center; padding:15px; background:rgba(201,169,110,0.1); border:1px solid var(--gold); border-radius:8px; margin-bottom:20px;">
+          <!-- Content managed by JS -->
+        </div>
+
+        <h3 style="font-family:'Playfair Display',serif; font-size:22px; color:var(--gold); margin-bottom:12px;">Reserve
+          Now</h3>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:24px;">Select your dates for this room</p>
+
+        <div class="field" style="margin-bottom:16px;">
+          <label>Dates</label>
+          <div style="display:grid; grid-template-columns:1fr; gap:12px;">
+            <div class="field">
+              <label style="font-size:10px;">Check-in</label>
+              <input type="date" id="m-checkin" onchange="syncModalDates('checkin')" />
+            </div>
+            <div class="field">
+              <label style="font-size:10px;">Check-out</label>
+              <input type="date" id="m-checkout" onchange="syncModalDates('checkout')" />
+            </div>
+          </div>
+        </div>
+
+        <div class="field" style="margin-bottom:24px;">
+          <label>Guests</label>
+          <select id="m-guests" onchange="syncModalGuests()">
+            <option value="1">1 Guest</option>
+            <option value="2" selected>2 Guests</option>
+            <option value="3">3 Guests</option>
+            <option value="4">4 Guests</option>
+          </select>
+        </div>
+
+        <button id="modalActionBtn" class="btn btn-gold" style="width:100%; border-radius:8px;"
+          onclick="scrollToBookingFromModal()">
+          Proceed to Details →
+        </button>
+        <p style="font-size:11px; color:var(--muted); text-align:center; margin-top:16px;">Secure your booking instantly
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROOMS -->
+  <div id="rooms">
+    <div class="section">
+      <div class="sec-label">Accommodations</div>
+      <div class="sec-title">Our Finest Rooms & Suites</div>
+      <div class="sec-sub">Select a room to see details and start your reservation</div>
+      <div class="rooms-grid" id="roomsGrid">
+        <!-- Filled by script.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- BOOKING FORM + SIDEBAR -->
+  <div id="booking" class="booking-section">
+    <div class="booking-wrap">
+      <div>
+        <!-- Steps -->
+        <div class="steps">
+          <div class="step active" id="step1-ind">
+            <div class="step-num">1</div><span>Dates</span>
+          </div>
+          <div class="step" id="step2-ind">
+            <div class="step-num">2</div><span>Details</span>
+          </div>
+          <div class="step" id="step3-ind">
+            <div class="step-num">3</div><span>Confirm</span>
+          </div>
+        </div>
+
+        <!-- Panel 1 -->
+        <div class="form-panel active" id="panel1">
+          <div id="bookingAuthNotice"
+            style="text-align:center; padding:15px; background:rgba(201,169,110,0.05); border:1px solid var(--border); border-radius:8px; margin-bottom:24px;">
+            <!-- Content managed by JS -->
+          </div>
+          <div class="form-title">Plan Your Stay</div>
+          <div class="form-sub">Choose your dates and room preference</div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Check-in Date</label>
+              <input type="date" id="checkin" />
+              <div class="field-error" id="err-checkin"></div>
+            </div>
+            <div class="field">
+              <label>Check-out Date</label>
+              <input type="date" id="checkout" />
+              <div class="field-error" id="err-checkout"></div>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Guests</label>
+              <select id="guests">
+                <option value="1">1 Guest</option>
+                <option value="2" selected>2 Guests</option>
+                <option value="3">3 Guests</option>
+                <option value="4">4 Guests</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Room Type</label>
+              <select id="roomSelect">
+                <option value="">— Select Room —</option>
+              </select>
+              <div class="field-error" id="err-room"></div>
+            </div>
+          </div>
+
+          <div class="form-nav">
+            <span></span>
+            <button class="btn btn-gold" onclick="goStep(2)">Continue →</button>
+          </div>
+        </div>
+
+        <!-- Panel 2 -->
+        <div class="form-panel" id="panel2">
+          <div class="form-title">Your Details</div>
+          <div class="form-sub">We'll keep your information secure</div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>First Name</label>
+              <input type="text" id="fname" placeholder=" " />
+              <div class="field-error" id="err-fname"></div>
+            </div>
+            <div class="field">
+              <label>Last Name</label>
+              <input type="text" id="lname" placeholder=" " />
+              <div class="field-error" id="err-lname"></div>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Email Address</label>
+              <input type="email" id="email" placeholder=" " />
+              <div class="field-error" id="err-email"></div>
+            </div>
+            <div class="field">
+              <label>Phone Number</label>
+              <input type="tel" id="phone" placeholder=" " />
+            </div>
+          </div>
+
+          <div class="field-row single">
+            <div class="field">
+              <label>Special Requests (optional)</label>
+              <textarea id="requests" placeholder="Early check-in, dietary preferences, celebrations..."></textarea>
+            </div>
+          </div>
+
+          <div class="form-nav">
+            <button class="btn btn-outline" onclick="goStep(1)">← Back</button>
+            <button class="btn btn-gold" onclick="goStep(3)">Review Booking →</button>
+          </div>
+        </div>
+
+        <!-- Panel 3 -->
+        <div class="form-panel" id="panel3">
+          <div class="form-title">Confirm Your Reservation</div>
+          <div class="form-sub">Choose payment and review your booking</div>
+
+          <div id="reviewBox"
+            style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px;padding:22px;margin-bottom:24px;">
+          </div>
+
+          <div class="field-row single">
+            <div class="field">
+              <label style="margin-bottom:12px;">Select Payment Method</label>
+              <div class="payment-grid">
+                <label class="payment-opt selected" onclick="selectPay('phonepe')">
+                  <input type="radio" name="pay" value="phonepe" checked />
+                  <span class="pay-icon">📱</span>
+                  <span class="pay-label">PhonePe</span>
+                </label>
+                <label class="payment-opt" onclick="selectPay('razorpay')">
+                  <input type="radio" name="pay" value="razorpay" />
+                  <span class="pay-icon">💳</span>
+                  <span class="pay-label">Razorpay</span>
+                </label>
+                <label class="payment-opt" onclick="selectPay('upi')">
+                  <input type="radio" name="pay" value="upi" />
+                  <span class="pay-icon">⚡</span>
+                  <span class="pay-label">UPI ID</span>
+                </label>
+                <label class="payment-opt" onclick="selectPay('card')">
+                  <input type="radio" name="pay" value="card" />
+                  <span class="pay-icon">🔒</span>
+                  <span class="pay-label">Card Payment</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div id="cardDetails" class="field-row" style="display:none;margin-top:16px;">
+            <div class="field">
+              <label>Card Number</label>
+              <input type="text" id="cardnum" placeholder="XXXX XXXX XXXX XXXX" maxlength="19"
+                oninput="formatCard(this)" />
+              <div class="field-error" id="err-card"></div>
+            </div>
+            <div class="field">
+              <label>Expiry / CVV</label>
+              <input type="text" id="cardexp" placeholder="MM/YY · CVV" />
+            </div>
+          </div>
+
+          <div id="upiDetails" class="field-row single" style="display:none;margin-top:16px;">
+            <div class="field">
+              <label>UPI ID</label>
+              <input type="text" id="upiId" placeholder="username@upi" />
+            </div>
+          </div>
+
+          <div class="form-nav">
+            <button class="btn btn-outline" onclick="goStep(2)">← Back</button>
+            <button class="btn btn-gold" id="confirmBtn" onclick="submitBooking()">
+              Confirm & Pay
+            </button>
+          </div>
+        </div>
+
+        <!-- Panel 4: Success -->
+        <div class="form-panel" id="panel4">
+          <div style="text-align:center;padding:20px 0;">
+            <div style="font-size:56px;margin-bottom:20px;">🎉</div>
+            <div class="form-title">Booking Confirmed!</div>
+            <div class="form-sub" style="margin-bottom:24px;">Your reservation is secured. A confirmation has been sent
+              to your email.</div>
+            <div id="confirmDetails"
+              style="background:rgba(76,175,125,.07);border:1px solid rgba(76,175,125,.25);border-radius:6px;padding:20px;text-align:left;margin-bottom:24px;">
+            </div>
+            <button class="btn btn-outline" onclick="resetForm()">Make Another Booking</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIDEBAR -->
+      <div class="sidebar" id="bookingSidebar">
+        <div class="sidebar-title">Booking Summary</div>
+
+        <div class="summary-row">
+          <span class="label">Room</span>
+          <span class="val" id="sumRoom">—</span>
+        </div>
+        <div class="summary-row">
+          <span class="label">Check-in</span>
+          <span class="val" id="sumCheckin">—</span>
+        </div>
+        <div class="summary-row">
+          <span class="label">Check-out</span>
+          <span class="val" id="sumCheckout">—</span>
+        </div>
+        <div class="summary-row">
+          <span class="label">Nights</span>
+          <span class="val gold" id="sumNights">—</span>
+        </div>
+        <div class="summary-row">
+          <span class="label">Guests</span>
+          <span class="val" id="sumGuests">—</span>
+        </div>
+
+        <div class="summary-divider"></div>
+
+        <div class="summary-row">
+          <span class="label">Room charges</span>
+          <span class="val" id="sumBase">—</span>
+        </div>
+        <div class="summary-row">
+          <span class="label">Taxes & fees (18%)</span>
+          <span class="val" id="sumTax">—</span>
+        </div>
+        <div class="summary-row">
+          <span class="label">Service charge</span>
+          <span class="val" id="sumService">—</span>
+        </div>
+
+        <div class="summary-divider"></div>
+
+        <div class="summary-total">
+          <span class="label">Total Due</span>
+          <span class="val" id="sumTotal">₹0</span>
+        </div>
+
+        <div class="summary-note">Prices include all applicable taxes. Free cancellation up to 48 hours before check-in.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI CONCIERGE -->
+  <div id="concierge" class="concierge-section">
+    <div class="concierge-wrap">
+      <div class="sec-label">AI Assistant</div>
+      <div class="sec-title" style="margin-bottom:8px;">Your Personal Concierge</div>
+      <div class="sec-sub" style="margin-bottom:32px;">Ask about rooms, amenities, local attractions, or anything about
+        your stay</div>
+
+      <div class="concierge-box">
+        <div class="concierge-header">
+          <div class="concierge-avatar">✦</div>
+          <div>
+            <div class="concierge-name">Velour Concierge</div>
+            <div class="concierge-status">● Online — Powered by GPT-4</div>
+          </div>
+        </div>
+        <div class="chat-area" id="chatArea">
+          <div class="msg ai">
+            <div class="msg-avatar">✦</div>
+            <div class="msg-bubble">Welcome to The Grand Velour! I'm your personal concierge. Ask me anything — room
+              recommendations, local dining, activities nearby, or help with your booking. How may I assist you today?
+            </div>
+          </div>
+        </div>
+        <div class="chat-input-row">
+          <input class="chat-input" id="chatInput" aria-label="Chat input"
+            placeholder="Ask about rooms, dining, activities..." onkeydown="if(event.key==='Enter')sendChat()" />
+          <button class="chat-send" onclick="sendChat()" id="chatSendBtn">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN DASHBOARD -->
+  <div id="admin" class="admin-section">
+    <div class="admin-wrap" id="adminContent" style="display:none;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px;">
+        <div>
+          <div class="sec-label">Dashboard</div>
+          <div class="sec-title" style="margin-bottom:8px;">Admin Overview</div>
+          <div class="sec-sub">Live booking data & statistics synced with database</div>
+        </div>
+        <button class="btn btn-outline" style="border-color:var(--red); color:var(--red);" onclick="handleLogout()">Exit
+          Admin Area</button>
+      </div>
+
+      <div class="admin-grid" id="statsGrid"></div>
+
+      <h3
+        style="font-family:'Playfair Display',serif;font-size:22px;color:var(--text);margin-top:48px;margin-bottom:4px;">
+        Recent Bookings</h3>
+      <div style="color:var(--muted);font-size:13px;margin-bottom:8px;">All reservations in real-time</div>
+
+      <div style="overflow-x:auto;">
+        <table class="bookings-table" id="bookingsTable">
+          <thead>
+            <tr>
+              <th>Booking ID</th>
+              <th>Guest</th>
+              <th>Room</th>
+              <th>Check-in</th>
+              <th>Nights</th>
+              <th>Total</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="bookingsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Admin Login Section -->
+    <div class="admin-wrap" id="adminLogin" style="max-width:400px; margin:0 auto; text-align:center;">
+      <div class="sec-label">Secure Access</div>
+      <div class="sec-title" style="margin-bottom:24px;">Admin Portal</div>
+      <div class="auth-card" style="box-shadow:none; border:1px solid var(--border);">
+        <div class="field" style="margin-bottom:16px; text-align:left;">
+          <label>Admin Email</label>
+          <input type="email" id="adminEmail" placeholder="admin@hotel.com" />
+        </div>
+        <div class="field" style="margin-bottom:24px; text-align:left;">
+          <label>Password</label>
+          <input type="password" id="adminPass" placeholder="••••••••" />
+        </div>
+        <button class="btn btn-gold" style="width:100%;" onclick="handleAdminLogin()">Authenticate</button>
+        <p style="font-size:12px; color:var(--muted); margin-top:20px;">Restricted access area for authorized personnel
+          only.</p>
+        <div style="margin-top:16px; font-size:12px; color:var(--silver);">
+          Are you a guest? <span style="color:var(--gold); cursor:pointer;" onclick="openAuthModal('login')">Login
+            here</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    © 2026 The Grand Velour · All Rights Reserved · Crafted by Antigravity AI
+  </footer>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast">
+    <div class="toast-dot" id="toastDot"></div>
+    <span id="toastMsg"></span>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
