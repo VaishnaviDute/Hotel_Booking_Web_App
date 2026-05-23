@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "name": "Admin User",
+    "email": "admin@hotel.com",
+    "password": "admin123",
+    "phone": "1234567890",
+    "avatar": null,
+    "role": "admin",
+    "created_at": "2026-03-10 04:56:12"
+  },
+  {
+    "id": 2,
+    "name": "Jony Bjaj",
+    "email": "jony@gmail.com",
+    "password": "12345",
+    "phone": null,
+    "avatar": null,
+    "role": "user",
+    "created_at": "2026-03-10 04:57:34"
+  },
+  {
+    "id": 7,
+    "name": "Vaishnavi Dute",
+    "email": "vaishnavidute@gmail.com",
+    "password": "12345678",
+    "phone": null,
+    "avatar": null,
+    "role": "user",
+    "created_at": "2026-03-10 05:52:14"
+  },
+  {
+    "id": 14,
+    "name": "Aarti Paraskar",
+    "email": "aarti@gmail.com",
+    "password": "aaru23",
+    "phone": null,
+    "avatar": null,
+    "role": "user",
+    "created_at": "2026-03-18 05:46:07"
+  },
+  {
+    "id": 17,
+    "name": "Vishal Dute",
+    "email": "dute1122@gmail.com",
+    "password": "vishal",
+    "phone": null,
+    "avatar": null,
+    "role": "user",
+    "created_at": "2026-03-21 15:00:35"
+  }
+]
